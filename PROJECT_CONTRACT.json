@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "metrics": {
+    "production_loc": 2302,
+    "production_files": 33,
+    "production_packages": 10,
+    "test_files": 10,
+    "production_functions": 162,
+    "decision_points": 350
+  },
+  "persistence": {
+    "module": "go.etcd.io/bbolt",
+    "entities": [
+      "User",
+      "TrainingVideo",
+      "ViewingProgress",
+      "Feedback",
+      "AuditRecord"
+    ],
+    "reopen_test": "TestPersistenceSurvivesReopen"
+  },
+  "workflows": [
+    {
+      "steps": [
+        "open the embedded training store",
+        "authenticate the training administrator",
+        "import published videos and exam tips from CSV",
+        "query the required catalog by volunteer role"
+      ],
+      "test": "TestWorkflowAdminImportsTrainingCatalog"
+    },
+    {
+      "steps": [
+        "authenticate the volunteer",
+        "load required videos for the service role",
+        "persist a completed viewing with its audit record",
+        "submit feedback and query the completion audit"
+      ],
+      "test": "TestWorkflowVolunteerCompletesAndSubmitsFeedback"
+    },
+    {
+      "steps": [
+        "open the role completion dashboard",
+        "load active volunteers and required videos",
+        "aggregate persisted viewing completions by role",
+        "review outstanding training and audit records"
+      ],
+      "test": "TestWorkflowAdminReviewsRoleCompletion"
+    }
+  ]
+}
