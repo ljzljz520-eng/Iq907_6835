@@ -15,6 +15,9 @@ func (s *Service) CompleteBatch(ctx context.Context, volunteer domain.User, vide
 		return err
 	}
 	for index, videoID := range videoIDs {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		video, err := s.repository.FindVideo(videoID)
 		if err != nil {
 			return fmt.Errorf("batch video %s: %w", videoID, err)
@@ -22,6 +25,9 @@ func (s *Service) CompleteBatch(ctx context.Context, volunteer domain.User, vide
 		watched := watchedSeconds[videoID]
 		if watched < video.DurationSec {
 			return fmt.Errorf("%w: video %s is incomplete", domain.ErrConflict, videoID)
+		}
+		if err := ctx.Err(); err != nil {
+			return err
 		}
 		completedAt := s.now()
 		progress := domain.ViewingProgress{VolunteerID: volunteer.ID, VideoID: videoID, WatchedSec: watched, Completed: true, CompletedAt: completedAt, UpdatedAt: completedAt}
