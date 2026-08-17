@@ -15,6 +15,13 @@ func (s *Service) CompleteBatch(ctx context.Context, volunteer domain.User, vide
 		return err
 	}
 	for index, videoID := range videoIDs {
+		// Honor cancellation at the boundary between records so the caller can
+		// stop the batch before any further storage writes or audit records are
+		// produced. Records already committed remain; those not yet started stay
+		// untouched, and the cancellation cause is returned.
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		video, err := s.repository.FindVideo(videoID)
 		if err != nil {
 			return fmt.Errorf("batch video %s: %w", videoID, err)
